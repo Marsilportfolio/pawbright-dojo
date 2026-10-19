@@ -2272,7 +2272,11 @@ function pbMerge(a, b) {
   out.days = days;
   const la = a.lastDay || "", lb = b.lastDay || "";
   out.lastDay = la > lb ? la : lb || null;
-  out.streak = la > lb ? (a.streak || 0) : lb > la ? (b.streak || 0) : Math.max(a.streak || 0, b.streak || 0);
+  // La série se recalcule depuis les jours joués (jours consécutifs jusqu'au dernier jour), pour qu'un appareil neuf ne la remette pas à 1.
+  let run = days.length ? 1 : 0;
+  for (let i = days.length - 1; i > 0; i--) { const d1 = new Date(days[i] + "T00:00:00Z"), d0 = new Date(days[i - 1] + "T00:00:00Z"); if (Math.round((d1 - d0) / 86400000) === 1) run++; else break; }
+  const sa = la === out.lastDay ? (a.streak || 0) : 0, sb = lb === out.lastDay ? (b.streak || 0) : 0;
+  out.streak = Math.max(run, sa, sb);
   // Leçons lues et labo : union (on garde la date la plus ancienne)
   ["lessons", "labo"].forEach(k => {
     const r = union(a[k], b[k]);
