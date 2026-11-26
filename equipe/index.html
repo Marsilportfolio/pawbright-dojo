@@ -4037,7 +4037,7 @@ const INTERVALS=[0,1,3,6,14,30,60,120]; // days: spaced-repetition steps
 /* ---------- Language (English by default, French on demand) ---------- */
 const T={
 en:{
- nav:{home:"Home",cours:"Course",quiz:"Quiz",cartes:"Cards",labo:"PawBright Lab",laboShort:"Lab",atelier:"Workshop",glossaire:"Glossary"},
+ nav:{home:"Home",cours:"Course",quiz:"Quiz",cartes:"Cards",labo:"PawBright Lab",laboShort:"Lab",atelier:"Workshop",glossaire:"Glossary",podcast:"Podcast"},
  levels:["Puppy","Apprentice","Junior strategist","Strategist","Senior","Creative director","Dojo master"],
  badges:{first:["First paw","First quiz completed"],lessons5:["Good student","5 lessons read"],lessonsAll:["Dojo graduate","All lessons read"],cards50:["Elephant memory","50 cards reviewed"],streak3:["Regular","3 days in a row"],streak7:["One week","7 days in a row"],labo:["Ad detective","5 ads analysed"],xp500:["500 XP","Confirmed strategist"]},
  badge:"🏅 Badge: ",xp:"XP",level:"level",streak:"streak",days:"d",change:"switch",switchPlayer:"Switch player",player:"Player",
@@ -4079,7 +4079,7 @@ en:{
  locale:"en-US"
 },
 fr:{
- nav:{home:"Accueil",cours:"Cours",quiz:"Quiz",cartes:"Cartes",labo:"Labo PawBright",laboShort:"Labo",atelier:"Atelier",glossaire:"Glossaire"},
+ nav:{home:"Accueil",cours:"Cours",quiz:"Quiz",cartes:"Cartes",labo:"Labo PawBright",laboShort:"Labo",atelier:"Atelier",glossaire:"Glossaire",podcast:"Podcast"},
  levels:["Chiot","Apprenti","Stratège junior","Stratège","Senior","Directeur créa","Maître du Dojo"],
  badges:{first:["Première patte","Premier quiz terminé"],lessons5:["Bon élève","5 leçons lues"],lessonsAll:["Diplômé du Dojo","Toutes les leçons lues"],cards50:["Mémoire d'éléphant","50 cartes révisées"],streak3:["Régulier","3 jours d'affilée"],streak7:["Une semaine","7 jours d'affilée"],labo:["Détective pub","5 pubs analysées"],xp500:["500 XP","Stratège confirmé"]},
  badge:"🏅 Badge : ",xp:"XP",level:"niveau",streak:"série",days:"j",change:"changer",switchPlayer:"Changer de joueur",player:"Joueur",
@@ -4127,7 +4127,7 @@ function setLang(l){if(l!=="fr"&&l!=="en")return;lang=l;DATA=l==="fr"?DATA_FR:DA
 function langSwitch(big){return `<div class="langsw ${big?"big":""}" role="group" aria-label="${esc(t("language"))}"><button data-lang="en" class="${lang==="en"?"on":""}">English</button><button data-lang="fr" class="${lang==="fr"?"on":""}">Français</button></div>`;}
 document.documentElement.lang=lang;
 const PAGES=[
- {id:"home",ic:"🏠"},{id:"cours",ic:"🎓"},{id:"quiz",ic:"⚡"},{id:"cartes",ic:"🃏"},{id:"labo",ic:"🐶"},{id:"atelier",ic:"✍️"},{id:"glossaire",ic:"📖"}
+ {id:"home",ic:"🏠"},{id:"cours",ic:"🎓"},{id:"quiz",ic:"⚡"},{id:"cartes",ic:"🃏"},{id:"labo",ic:"🐶"},{id:"atelier",ic:"✍️"},{id:"glossaire",ic:"📖"},{id:"podcast",ic:"🎧"}
 ];
 // Exercise levels are stored in each language's data ("facile"/"easy"…): normalise for the colour pill.
 const lvlKey=l=>({facile:"easy",moyen:"medium",difficile:"hard"})[l]||l;
@@ -4259,7 +4259,44 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b
 /* ---------- Views ---------- */
 function chooser(v){v.innerHTML=`<div class="hero"><div class="bowl"><img class="jk jk-noir" src="joker-logo-noir.png" alt="It's Joker Time"><img class="jk jk-blanc" src="joker-logo-blanc.png" alt="It's Joker Time"></div><div><div class="eyebrow">It's Joker Time · Dojo</div><h1>${t("whoPlays")}</h1><p style="color:var(--fg2)">${t("eachOwn")}</p></div></div><div class="list">${PROFILES.map(n=>`<button class="item" data-profile="${esc(n)}"><span class="ic" style="font-size:1.4rem">🥋</span><span class="t">${esc(n)}</span><span class="m">${(()=>{try{const r=JSON.parse(localStorage.getItem("pbteam_"+n.replace(/\s+/g,"_"))||"null");return r?r.xp+" XP":t("newPlayer");}catch(e){return "";}})()}</span></button>`).join("")}</div><div><div class="eyebrow" style="margin-bottom:6px">${t("language")}</div>${langSwitch(true)}</div>`;v.querySelectorAll("[data-profile]").forEach(b=>b.onclick=()=>{PROFILE=b.dataset.profile;try{localStorage.setItem("pbteam_profile",PROFILE);}catch(e){}S=load();dbDoc=null;page="home";render();touchDay();save();connectDb();cloudSync(false);});if(SYNC_URL){fetch(SYNC_URL+"?action=board").then(r=>r.json()).then(j=>{const b=(j&&j.board)||{};const top=Math.max(0,...PROFILES.map(n=>b[n]||0));PROFILES.forEach(n=>{const el=v.querySelector('[data-profile="'+n+'"] .m');if(el&&b[n]!=null){el.textContent=b[n]+" XP";if(top>0&&b[n]===top){const g=document.createElement("span");g.className="goat";g.innerHTML='<img src="goat.png" alt="GOAT"><b>GOAT</b>';el.after(g);}}});}).catch(()=>{});}}
 function switchProfile(){PROFILE=null;try{localStorage.removeItem("pbteam_profile");}catch(e){}dbDoc=null;render();}
-function render(){const v=$("#view");v.innerHTML="";if(!PROFILE){$("#rail").innerHTML="";$("#tabbar").innerHTML="";chooser(v);return;}renderNav();({home,cours,quiz,cartes,labo,atelier,glossaire})[page](v);}
+/* ---------- Podcast (version équipe, 26/11) : épisodes à deux voix, écoute écran éteint ---------- */
+const PODS=[{"id": "l36", "file": "podcast/l36.mp3", "min": 4}, {"id": "l46", "file": "podcast/l46.mp3", "min": 4}];
+let POD_A=null,podCur=null,podRate=1;
+try{podRate=+localStorage.getItem("pbteam_podrate")||1;}catch(e){}
+function podAudio(){if(!POD_A){POD_A=document.createElement("audio");POD_A.controls=true;POD_A.preload="metadata";POD_A.style.width="100%";POD_A.addEventListener("ended",podEnded);POD_A.addEventListener("timeupdate",podSavePos);}return POD_A;}
+function podKey(){return "pbteam_pod_"+(PROFILE||"").replace(/\s+/g,"_");}
+function podDone(){try{return JSON.parse(localStorage.getItem(podKey())||"{}");}catch(e){return {};}}
+function podMark(id){const d=podDone();d[id]=1;try{localStorage.setItem(podKey(),JSON.stringify(d));}catch(e){}}
+function podTitle(id){const l=DATA.lessons.find(x=>x.id===id);return l?(l.num+" · "+l.title):id;}
+let podLast=0;
+function podSavePos(){if(!podCur||!POD_A)return;const n=Date.now();if(n-podLast<4000)return;podLast=n;try{localStorage.setItem("pbteam_podpos_"+podCur,String(Math.floor(POD_A.currentTime)));}catch(e){}}
+function podPlay(id){const p=PODS.find(x=>x.id===id);if(!p)return;const a=podAudio();podCur=id;a.src=p.file;a.defaultPlaybackRate=podRate;a.playbackRate=podRate;
+  let pos=0;try{pos=+localStorage.getItem("pbteam_podpos_"+id)||0;}catch(e){}
+  if(pos>5)a.addEventListener("loadedmetadata",function f(){a.removeEventListener("loadedmetadata",f);if(pos<a.duration-10)a.currentTime=pos;});
+  a.play().catch(()=>{});
+  if("mediaSession" in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:podTitle(id),artist:"It's Joker Time · Dojo",album:"Podcast",artwork:[{src:"joker-logo-noir.png",sizes:"252x240",type:"image/png"}]});navigator.mediaSession.setActionHandler("nexttrack",()=>podNext());navigator.mediaSession.setActionHandler("previoustrack",()=>podPrev());}catch(e){}}
+  if(page==="podcast")render();}
+function podNext(){const i=PODS.findIndex(x=>x.id===podCur);if(i>=0&&i<PODS.length-1)podPlay(PODS[i+1].id);}
+function podPrev(){const i=PODS.findIndex(x=>x.id===podCur);if(i>0)podPlay(PODS[i-1].id);}
+function podEnded(){const id=podCur;try{localStorage.removeItem("pbteam_podpos_"+id);}catch(e){}
+  if(id&&!podDone()[id]){podMark(id);addXp(15,"Podcast");}
+  const i=PODS.findIndex(x=>x.id===id);if(i>=0&&i<PODS.length-1)podPlay(PODS[i+1].id);else if(page==="podcast")render();}
+function podcast(v){const fr=lang==="fr",done=podDone();
+  const intro=fr?"Deux animateurs t'expliquent chaque leçon, en anglais. Ça continue écran éteint, épisode après épisode. +15 XP pour chaque épisode écouté jusqu'au bout."
+              :"Two hosts walk you through each lesson. Keeps playing with the screen off, one episode after another. +15 XP for every episode you finish.";
+  const mods={};PODS.forEach(p=>{const l=DATA.lessons.find(x=>x.id===p.id);const m=l?l.module:0;(mods[m]=mods[m]||[]).push(p);});
+  const modTitle=m=>{const x=DATA.modules.find(y=>y.id===+m);return x?x.title:"";};
+  v.innerHTML=`<div class="hero"><div class="bowl">🎧</div><div><div class="eyebrow">Podcast · ${PODS.length} ${fr?"épisodes":"episodes"}</div><h1>${fr?"Apprends en marchant":"Learn on the go"}</h1><p style="color:var(--fg2)">${intro}</p></div></div>
+  <div class="card" id="podNow" style="margin-bottom:16px"></div>
+  ${Object.keys(mods).map(m=>`<div class="eyebrow" style="margin:14px 0 6px">${esc(modTitle(m))}</div><div class="list">${mods[m].map(p=>`<button class="item" data-pod="${p.id}"><span class="ic" style="font-size:1.3rem">${podCur===p.id?"▶️":(done[p.id]?"✅":"🎧")}</span><span class="t">${esc(podTitle(p.id))}</span><span class="m">${p.min} min</span></button>`).join("")}</div>`).join("")}`;
+  const now=v.querySelector("#podNow");
+  if(podCur){now.innerHTML=`<div class="eyebrow">${fr?"En cours":"Now playing"}</div><div style="font-weight:700;margin:6px 0 10px">${esc(podTitle(podCur))}</div><div id="podSlot"></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${[1,1.25,1.5,2].map(r=>`<button class="btn ${podRate===r?"primary":""}" data-rate="${r}">×${r}</button>`).join("")}<button class="btn" data-podnext="1">${fr?"Suivant":"Next"} ⏭</button></div>`;now.querySelector("#podSlot").appendChild(podAudio());}
+  else now.innerHTML=`<div style="color:var(--fg2)">${fr?"Choisis un épisode ci-dessous pour commencer.":"Pick an episode below to start."}</div>`;
+  v.querySelectorAll("[data-pod]").forEach(b=>b.onclick=()=>podPlay(b.dataset.pod));
+  v.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{podRate=+b.dataset.rate;try{localStorage.setItem("pbteam_podrate",String(podRate));}catch(e){}if(POD_A){POD_A.defaultPlaybackRate=podRate;POD_A.playbackRate=podRate;}render();});
+  v.querySelectorAll("[data-podnext]").forEach(b=>b.onclick=()=>podNext());}
+
+function render(){const v=$("#view");v.innerHTML="";if(!PROFILE){$("#rail").innerHTML="";$("#tabbar").innerHTML="";chooser(v);return;}renderNav();({home,cours,quiz,cartes,labo,atelier,glossaire,podcast})[page](v);}
 
 function home(v){
  const due=dueCards().length,readN=Object.values(S.lessons).filter(l=>l.read).length;
