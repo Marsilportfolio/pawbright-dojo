@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>PawBright Dojo - Team</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>It's Joker Time · Dojo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
 <style>
@@ -108,7 +108,7 @@ textarea{min-height:120px;resize:vertical}
 .timeline div{background:var(--bg3);border-radius:6px;padding:8px;text-align:center;font-size:.8rem}
 .timeline div b{display:block;font-family:var(--mono);font-size:.95rem}
 .timeline div.cur{background:var(--gold2);border:1px solid var(--gold)}
-.sr-only{position:absolute;left:-9999px} .goat{display:inline-flex;flex-direction:column;align-items:center;margin-left:8px;line-height:1;vertical-align:middle}.goat img{width:18px;height:auto}.goat b{font-family:var(--mono);font-size:.5rem;letter-spacing:.12em;color:var(--warn);margin-top:2px}
+.sr-only{position:absolute;left:-9999px} .brand .logo.jkl{background:none;width:44px;height:44px;border-radius:0}.brand .logo.jkl img{width:44px;height:auto}.hero .bowl img{width:84px;height:auto}.jk-blanc{display:none}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .jk-noir{display:none}:root:not([data-theme="light"]) .jk-blanc{display:inline}}:root[data-theme="dark"] .jk-noir{display:none}:root[data-theme="dark"] .jk-blanc{display:inline} .goat{display:inline-flex;flex-direction:column;align-items:center;margin-left:8px;line-height:1;vertical-align:middle}.goat img{width:18px;height:auto}.goat b{font-family:var(--mono);font-size:.5rem;letter-spacing:.12em;color:var(--warn);margin-top:2px}
 @media (max-width:820px){
   .app{grid-template-columns:1fr}
   nav.rail{display:none}
@@ -4134,7 +4134,7 @@ const lvlKey=l=>({facile:"easy",moyen:"medium",difficile:"hard"})[l]||l;
 
 /* ---------- State (localStorage + optional db sync), shared by both languages ---------- */
 const DEFAULT={xp:0,streak:0,lastDay:null,days:[],lessons:{},quiz:{},cards:{},labo:{},atelier:{},badges:[],version:1};
-const PROFILES=["Saad", "Mehdi", "Zazou", "Matrix", "AIBO"];
+const PROFILES=["Saad", "Mehdi", "Zazou", "Matrix", "AIBO", "Omar", "Hind"];
 let PROFILE=null;try{PROFILE=localStorage.getItem("pbteam_profile");}catch(e){}
 if(PROFILE&&!PROFILES.includes(PROFILE))PROFILE=null;
 const KEY=()=>"pbteam_"+(PROFILE||"").replace(/\s+/g,"_");
@@ -4248,7 +4248,7 @@ let page="home",sub=null;
 function go(p,s){page=p;sub=s||null;window.scrollTo(0,0);render();}
 function renderNav(){
  const due=dueCards().length;const nav=t("nav");
- $("#rail").innerHTML=`<div class="brand"><div class="logo">PB</div><div><b>PawBright Dojo</b><small>Creative Strategist · Bromelain+</small></div></div>`+
+ $("#rail").innerHTML=`<div class="brand"><div class="logo jkl"><img class="jk jk-noir" src="joker-logo-noir.png" alt="It's Joker Time"><img class="jk jk-blanc" src="joker-logo-blanc.png" alt="It's Joker Time"></div><div><b>It's Joker Time</b><small>Dojo · Creative Strategist</small></div></div>`+
   PAGES.map(p=>`<button class="navbtn ${page===p.id?"on":""}" data-go="${p.id}"><span class="ic">${p.ic}</span>${nav[p.id]}${p.id==="cartes"&&due?`<span class="badge">${due}</span>`:""}</button>`).join("")+
   `<div class="spacer"></div><div class="xpbar"><button class="btn small" data-switch style="margin-bottom:8px">👤 ${esc(PROFILE)} · ${t("change")}</button><br><b>${esc(levelName())}</b> · ${t("level")} ${level()}<br>${S.xp} XP · ${t("streak")} <span class="streak">${S.streak} ${t("days")}</span><div class="track"><div class="fill" style="width:${Math.min(100,Math.round(100*(S.xp-40*(level()-1)*(level()-1))/(nextLevelXp()-40*(level()-1)*(level()-1))))}%"></div></div></div>`+langSwitch(false);
  $("#tabbar").innerHTML=PAGES.map(p=>`<button class="${page===p.id?"on":""}" data-go="${p.id}"><span class="ic">${p.ic}</span>${p.id==="labo"?nav.laboShort:nav[p.id]}${p.id==="cartes"&&due?`<span class="badge">${due}</span>`:""}</button>`).join("");
@@ -4257,14 +4257,14 @@ function updateBadges(){renderNav();}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b){go(b.dataset.go);}const sw=e.target.closest("[data-switch]");if(sw)switchProfile();const lg=e.target.closest("[data-lang]");if(lg)setLang(lg.dataset.lang);});
 
 /* ---------- Views ---------- */
-function chooser(v){v.innerHTML=`<div class="hero"><div class="bowl">🐾</div><div><div class="eyebrow">PawBright Dojo · Team</div><h1>${t("whoPlays")}</h1><p style="color:var(--fg2)">${t("eachOwn")}</p></div></div><div class="list">${PROFILES.map(n=>`<button class="item" data-profile="${esc(n)}"><span class="ic" style="font-size:1.4rem">🥋</span><span class="t">${esc(n)}</span><span class="m">${(()=>{try{const r=JSON.parse(localStorage.getItem("pbteam_"+n.replace(/\s+/g,"_"))||"null");return r?r.xp+" XP":t("newPlayer");}catch(e){return "";}})()}</span></button>`).join("")}</div><div><div class="eyebrow" style="margin-bottom:6px">${t("language")}</div>${langSwitch(true)}</div>`;v.querySelectorAll("[data-profile]").forEach(b=>b.onclick=()=>{PROFILE=b.dataset.profile;try{localStorage.setItem("pbteam_profile",PROFILE);}catch(e){}S=load();dbDoc=null;page="home";render();touchDay();save();connectDb();cloudSync(false);});if(SYNC_URL){fetch(SYNC_URL+"?action=board").then(r=>r.json()).then(j=>{const b=(j&&j.board)||{};const top=Math.max(0,...PROFILES.map(n=>b[n]||0));PROFILES.forEach(n=>{const el=v.querySelector('[data-profile="'+n+'"] .m');if(el&&b[n]!=null){el.textContent=b[n]+" XP";if(top>0&&b[n]===top){const g=document.createElement("span");g.className="goat";g.innerHTML='<img src="goat.png" alt="GOAT"><b>GOAT</b>';el.after(g);}}});}).catch(()=>{});}}
+function chooser(v){v.innerHTML=`<div class="hero"><div class="bowl"><img class="jk jk-noir" src="joker-logo-noir.png" alt="It's Joker Time"><img class="jk jk-blanc" src="joker-logo-blanc.png" alt="It's Joker Time"></div><div><div class="eyebrow">It's Joker Time · Dojo</div><h1>${t("whoPlays")}</h1><p style="color:var(--fg2)">${t("eachOwn")}</p></div></div><div class="list">${PROFILES.map(n=>`<button class="item" data-profile="${esc(n)}"><span class="ic" style="font-size:1.4rem">🥋</span><span class="t">${esc(n)}</span><span class="m">${(()=>{try{const r=JSON.parse(localStorage.getItem("pbteam_"+n.replace(/\s+/g,"_"))||"null");return r?r.xp+" XP":t("newPlayer");}catch(e){return "";}})()}</span></button>`).join("")}</div><div><div class="eyebrow" style="margin-bottom:6px">${t("language")}</div>${langSwitch(true)}</div>`;v.querySelectorAll("[data-profile]").forEach(b=>b.onclick=()=>{PROFILE=b.dataset.profile;try{localStorage.setItem("pbteam_profile",PROFILE);}catch(e){}S=load();dbDoc=null;page="home";render();touchDay();save();connectDb();cloudSync(false);});if(SYNC_URL){fetch(SYNC_URL+"?action=board").then(r=>r.json()).then(j=>{const b=(j&&j.board)||{};const top=Math.max(0,...PROFILES.map(n=>b[n]||0));PROFILES.forEach(n=>{const el=v.querySelector('[data-profile="'+n+'"] .m');if(el&&b[n]!=null){el.textContent=b[n]+" XP";if(top>0&&b[n]===top){const g=document.createElement("span");g.className="goat";g.innerHTML='<img src="goat.png" alt="GOAT"><b>GOAT</b>';el.after(g);}}});}).catch(()=>{});}}
 function switchProfile(){PROFILE=null;try{localStorage.removeItem("pbteam_profile");}catch(e){}dbDoc=null;render();}
 function render(){const v=$("#view");v.innerHTML="";if(!PROFILE){$("#rail").innerHTML="";$("#tabbar").innerHTML="";chooser(v);return;}renderNav();({home,cours,quiz,cartes,labo,atelier,glossaire})[page](v);}
 
 function home(v){
  const due=dueCards().length,readN=Object.values(S.lessons).filter(l=>l.read).length;
  const mission=pickMission();
- v.innerHTML=`<div class="hero"><div class="bowl">🐾</div><div><div class="eyebrow">${t("heroEyebrow")}</div><h1>${esc(t("hello",PROFILE.split(" ")[0]))}</h1><p style="color:var(--fg2)">${t("goal")}</p></div></div>
+ v.innerHTML=`<div class="hero"><div class="bowl"><img class="jk jk-noir" src="joker-logo-noir.png" alt="It's Joker Time"><img class="jk jk-blanc" src="joker-logo-blanc.png" alt="It's Joker Time"></div><div><div class="eyebrow">${t("heroEyebrow")}</div><h1>${esc(t("hello",PROFILE.split(" ")[0]))}</h1><p style="color:var(--fg2)">${t("goal")}</p></div></div>
  <div class="grid">
   <div class="card stat"><span class="n">${S.xp}</span><span class="l">XP · ${esc(levelName())}</span></div>
   <div class="card stat"><span class="n">${S.streak}</span><span class="l">${t("statStreak")}</span></div>
